@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify,request
 from flask.views import MethodView
 
 # Dummy database to hold movie examples
@@ -10,10 +10,21 @@ movies = {
 
 
 class Movies(MethodView):
+
     def get(self, movie_id):
         if movie_id is None:
             # Return a list of all movies
-            return jsonify({"movies": [dict({"title": movie["title"]}, **{"id": i}) for i, movie in movies.items()]})
+            return jsonify({
+                "movies": [
+                    {"title": movie["title"], "id": movie_id}
+                    for movie_id, movie in movies.items()
+                ]
+            })
         else:
             # Return the details of a specific movie
-            return jsonify({"movie": movies[str(movie_id)]})
+            movie = movies.get(str(movie_id))
+
+            if movie is None:
+                return jsonify({"error": "Movie not found"}), 404
+
+            return jsonify({"movie": movie})
